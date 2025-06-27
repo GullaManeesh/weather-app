@@ -3,11 +3,23 @@ import { getWeather } from "./weatherApi";
 
 function App() {
   const [city, setCity] = useState("");
-  const [weather, setWeather] = useState();
+  const [weather, setWeather] = useState(null);
+  const [error, setError] = useState(""); // <-- new error state
+
   const handleClick = async () => {
-    const data = await getWeather(city);
-    setWeather(data);
-    console.log(data);
+    setError("");
+    setWeather(null);
+    try {
+      const data = await getWeather(city);
+      console.log(data);
+      if (data.cod && data.cod !== 200) {
+        setError("City not found. Please try again.");
+      } else {
+        setWeather(data);
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -25,7 +37,6 @@ function App() {
             value={city}
             onChange={(e) => setCity(e.target.value)}
             onKeyPress={(e) => {
-              // Allow pressing Enter to search
               if (e.key === "Enter") {
                 handleClick();
               }
@@ -37,6 +48,12 @@ function App() {
             Search
           </button>
         </div>
+
+        {error && (
+          <div className="text-red-600 text-center font-semibold mb-4">
+            {error}
+          </div>
+        )}
 
         {weather && (
           <div className="text-center mt-6">
